@@ -48,3 +48,15 @@ In the frontend a few components were added to be able to display the queries in
 To emulate a AI chat, I treated the queries as a conversation (visually only, otherwise would be out of scope), so a **Query Component** was created separately and mapped to the "current convesation" state, which contains the query output from the api in an array. Using the existing header UI, I added the create new conversation modal which allows users to clear the current conversation after a warning dialog. and a add documents modal, which fully implementing would be out of scope for the time alloted, but could be done saving the responses in local storage, and creating a new endpoint that uses those saved documents instead of sectioning and saving to vector storage on every call.
 
 ## Reflective Response
+
+`What unique challenges do you foresee in developing and integrating AI regulatory agents for legal
+compliance from a full-stack perspective? How would you address these challenges to make the system
+robust and user-friendly?`
+
+Accuracy, multi-format data, complex data display 
+
+- Since we are working with legal compliance, accuracy of responses would be an issue to look out for, as inaccurate answers can negatively impact clients and lower trust in the company. Even in this small exercise, some inaccurate citations sometimes came in the responses. Fine-tuning the choice and training of models for accuracy is essential, as well as having a robust testing environment where issues can be replicated and resolved before sending to prod will help the customer with responses that are useful and trustworthy.
+
+- Documents come in infinitely different formats, layouts, and use graphs, tables, images, etc. Sectioning these documents can be a challenge to do reliably. Programmatic parsing is out of the question in these scenarios, so agents will have to be trained and fine-tuned for these specific tasks. Metadata produced by the output will also have to be reliable, as I'm assuming citations and sections should be able to be reflected in the UI, so maybe a step with ad-hoc manual, or programmatic verification can be used. These tasks can also cause performance issues when scaled, so working with tasks in parallel and asynchronously will be essential.
+
+- All this complex data also needs to be displayed to the users in a manner that is user-readable, balancing readability and complexity would be necessary to give customers a useful, but easy-to-use. Designs for new features have to be thought about in a holistic considering all features that already exist and how new features integrate into it. With the volume of data displayed, performance could also be an issue if handled carelessly, so caching, smart loading, and other techniques will alleviate these issues and make it easier to build and add more features in the future. 
