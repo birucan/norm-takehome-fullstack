@@ -28,6 +28,9 @@ Thumbs.db
 *.ntvs*
 *.njsproj
 *.sln
+*.pdf
 
 # Dependency directories
 bower_components/
+
+__pycache__/

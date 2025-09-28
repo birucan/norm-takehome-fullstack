@@ -15,31 +15,52 @@ import {
   MenuList,
   Icon,
   Tooltip,
+  Checkbox,
+  Input,
+  Button,
+  VStack,
+  FormControl,
+  FormLabel,
+  Spinner,
+  useToast
 } from '@chakra-ui/react';
 import { FiChevronDown } from 'react-icons/fi';
 import { useEffect, useState } from 'react';
 import { MdLogout } from 'react-icons/md';
 import NavButton, { NavIconEnum } from './NavButton';
+import ModalMenu from './ModalMenu';
 
 interface HeaderProps extends FlexProps {
   signOut: () => void;
+  createDocuments: (filePath: string, aiSectioning: boolean) => Promise<boolean>;
+  clearConversation: () => void;
 }
 
 export default function HeaderNav({
   signOut,
+  createDocuments,
+  clearConversation,
   ...rest
 }: HeaderProps): React.ReactNode {
   const [isHovered, setIsHovered] = useState(false);
+  const [isDocumentsModalOpen, setIsDocumentsModalOpen] = useState(false);
+  const [filePath, setFilePath] = useState('docs/laws.pdf');
+  const [aiSectioning, setAiSectioning] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isConversationModalOpen, setIsConversationModalOpen] = useState(false);
   const color = isHovered ? '#2800D7' : '#5E6272';
+  const toast = useToast();
 
   return (
     <Flex
       px={{ base: 4, md: 4 }}
+      h="64px"
       alignItems="center"
       bg="#FBFBFB"
       justifyContent={{ base: 'space-between', md: 'flex-end' }}
       borderBottom="1px"
       borderColor="#DBDCE1"
+      flexShrink={0}
       {...rest}
     >
       <Flex justifyContent="flex-start" width="full" alignItems="center">
@@ -75,12 +96,12 @@ export default function HeaderNav({
                 <NavButton
                   navIconEnum={NavIconEnum.DOCUMENT}
                   label="Documents"
-                  linkPath="/"
+                  onClick={() => setIsDocumentsModalOpen(true)}
                 />
                 <NavButton
                   navIconEnum={NavIconEnum.CREATE_PROJECT}
                   label="New Conversation"
-                  linkPath="/"
+                  onClick={() => setIsConversationModalOpen(true)}
                 />
               </HStack>
               <Box height="32px" width="1px" bg="#DBDCE1" mx={3} />
@@ -171,6 +192,110 @@ export default function HeaderNav({
           </Menu>
         </Flex>
       </HStack>
+      
+      {/* Documents Modal */}
+      <ModalMenu
+        isOpen={isDocumentsModalOpen}
+        onClose={() => setIsDocumentsModalOpen(false)}
+        title="Add Document"
+        size="md"
+      >
+        <VStack spacing={4} align="stretch" w="full">
+          <FormControl>
+            <FormLabel 
+              fontSize="sm" 
+              fontWeight="bold" 
+              color="#32343C"
+              mb={2}
+            >
+              File Path
+            </FormLabel>
+            <Input 
+              value={filePath} 
+              onChange={(e) => setFilePath(e.target.value)}
+              placeholder="Enter file path..."
+              borderColor="#DBDCE1"
+              _hover={{ borderColor: '#2800D7' }}
+              _focus={{ 
+                borderColor: '#2800D7', 
+                boxShadow: '0 0 0 1px #2800D7' 
+              }}
+              bg="white"
+            />
+          </FormControl>
+          
+          <FormControl>
+            <Checkbox 
+              isChecked={aiSectioning} 
+              onChange={(e) => setAiSectioning(e.target.checked)}
+              colorScheme="purple"
+              size="md"
+            >
+              <Text fontSize="sm" color="#5E6272">
+                AI-powered document sectioning
+              </Text>
+            </Checkbox>
+          </FormControl>
+          
+          <Box pt={2}>
+            <Button 
+              onClick={async () => {
+                setIsLoading(true);
+                try {
+                  await createDocuments(filePath, aiSectioning);
+                  setIsDocumentsModalOpen(false);
+                  toast({ title: 'Document added successfully!', status: 'success', duration: 3000 });
+                } catch (error) {
+                  console.error('Error creating documents:', error);
+                } finally {
+                  setIsLoading(false);
+                }
+              }}
+              bg="#2800D7"
+              color="white"
+              _hover={{ bg: '#1F0099' }}
+              _active={{ bg: '#1A0080' }}
+              size="md"
+              w="full"
+              isLoading={isLoading}
+              loadingText="Adding..."
+              spinner={<Spinner size="sm" />}
+            >
+              Add Document
+            </Button>
+          </Box>
+        </VStack>
+      </ModalMenu>
+      
+      {/* New Conversation Modal */}
+      <ModalMenu
+        isOpen={isConversationModalOpen}
+        onClose={() => setIsConversationModalOpen(false)}
+        title="New Conversation"
+        size="md"
+      >
+        <VStack spacing={6} align="stretch" w="full">
+          <Text fontSize="md" color="#32343C" textAlign="center">
+            Are you sure you want to clear the current conversation?
+          </Text>
+          
+          <Button 
+            onClick={() => {
+              clearConversation();
+              setIsConversationModalOpen(false);
+              toast({ title: 'Conversation cleared!', status: 'success', duration: 2000 });
+            }}
+            bg="#2800D7"
+            color="white"
+            _hover={{ bg: '#1F0099' }}
+            _active={{ bg: '#1A0080' }}
+            size="md"
+            w="full"
+          >
+            Yes
+          </Button>
+        </VStack>
+      </ModalMenu>
     </Flex>
   );
 }
